@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchRequest;
 use App\Models\Article;
 use App\Services\HtmlFilterService;
 use Illuminate\Http\Request;
@@ -23,16 +24,16 @@ class ArticleController extends Controller
         return view('articles.index', compact('articles'));
     }
 
-    public function search(Request $request)
+    public function search(SearchRequest $request)
     {
 
         // UNSECURE
-        $articles = Article::whereRaw("title like '%{$request->search}%'")->get();
+        //        $articles = Article::whereRaw("title like '%{$request->search}%'")->get();
 
         // SECURE
-        // $articles = Article::where('title', 'LIKE', "%{$request->search}%")
-        //                     ->orWhere('content', 'LIKE', "%{$request->search}%")
-        // ->get();
+        $articles = Article::where('title', 'LIKE', "%{$request->search}%")
+            ->orWhere('content', 'LIKE', "%{$request->search}%")
+            ->get();
 
         return view('articles.index', compact('articles'));
     }
