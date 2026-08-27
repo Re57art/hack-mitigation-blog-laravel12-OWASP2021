@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\BlockSuspiciousIPsMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Providers\FortifyServiceProvider;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'auth' => Authenticate::class,
             'guest' => RedirectIfAuthenticated::class,
+            'block_suspicious_ips' => BlockSuspiciousIPsMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
