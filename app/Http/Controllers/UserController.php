@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -109,4 +110,96 @@ class UserController extends Controller
     {
         return response()->download(storage_path('app/private/'.$request->get('filename')));
     }
+
+    public function upload(Request $request)
+    {
+
+        if (! $user = Auth::user()) {
+            return back()->with('message', 'Please Log In');
+        }
+
+        if (! $request->hasFile('file')) {
+            return back()->withErrors('Forbidden Operation');
+        }
+
+        $path = storage_path('app/public/docs/users/'.$user->id);
+
+        if (! file_exists($path)) {
+            mkdir($path, 0777, true);
+        }
+
+        $file = $request->file('file');
+
+        // UNSECURE
+
+        $filename = $file->getClientOriginalName();
+
+        $file->move($path, $filename);
+
+        File::create([
+            'name' => $filename,
+            'user_id' => $user->id,
+
+        ]);
+
+        // SECURE
+
+        // Definisci le estensioni e i MIME type permessi
+
+        // $allowedExtensions= ['jpg', 'jpeg', 'png', 'gif', 'pdf'];
+
+        // $allowedMimeTypes= ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+
+        // $file =$request->file('file');
+
+        // $extension = strtolower($file->getClientOriginalExtension());
+
+        // $mimeType = $file->getMimeType();
+
+        // if (!in_array($extension, $allowedExtensions) || !in_array($mimeType, $allowedMimeTypes)){
+
+        // return back()->withErrors('File type not allowed');
+
+        // }
+
+        //  $filename = $file->getClientOriginalName();
+
+        // // Genera un nome sicuro
+
+        // $fileuid = uniqid().'.'.$extension;
+
+        // // Salva in una cartella non pubblica (storage/app/private/docs/users/($user->id})
+
+        // $path= $file->storeAs("docs/users/{$user->id}", $fileuid, 'local');
+
+        // // Salva il record nel DB
+
+        // File::create([
+
+        // 'name' => $filename,
+
+        // 'user_id' => $user->id,
+
+        // 'uid'=> $fileuid,
+
+        // ]);
+
+        return back()->withMessage('Upload successful');
+    }
+
+    // public function download PrivateFile($file)
+
+    // if(!$user Auth::user()){
+
+    // {
+
+    //
+
+    // return back()->with('message', 'Please Log In');
+
+    // $fileRecord File::where('uid', $file)->where('user_id', $user->id)->firstOrFail();
+
+    // if(!$fileRecord) {
+
+    // return back()->with('message', 'File not found');
 }

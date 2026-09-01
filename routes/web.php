@@ -40,6 +40,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/users/email/change', [UserController::class, 'changeEmail'])->name('change.email');
     Route::post('/users/img/change', [UserController::class, 'changeImg'])->name('change.img');
 
+    Route::post('/files/upload', [UserController::class, 'upload'])->name('files.upload');
+
     Route::get('/download-privacy', [UserController::class, 'download'])->name('download');
 
     // SECURE
