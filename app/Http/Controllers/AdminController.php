@@ -2,56 +2,63 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Article;
+use App\Models\User;
 use App\Services\FinancialDataService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
     public function dashboard()
-	{
-		return view("admin.dashboard");
-	}
+    {
+        return view('admin.dashboard');
+    }
 
     public function articles()
     {
         $users = User::latest()->get();
         $articles = Article::latest()->get();
+
         return view('admin.articles', compact('articles'));
     }
 
     public function users()
     {
         $users = User::all();
+
         return view('admin.users', compact('users'));
     }
-    
-    public function toggleArticleStatus($id) {
+
+    public function toggleArticleStatus($id)
+    {
         // SECURE
         // if(!Auth::user()->isAdmin()){
         //     return back()->withMessage("Operation not permitted");
         // }
-        
+
         $article = Article::find($id);
-        $article->published = !$article->published;
+        $article->published = ! $article->published;
         $article->save();
+
         return back();
     }
 
-	public function toggleUsersAdmin($id)
-	{
+    public function toggleUsersAdmin($id)
+    {
         // SECURE
         // if(!Auth::user()->isAdmin()){
         //     return back()->withMessage("Operation not permitted");
         // }
         // UNSECURE
-		$user = User::find($id);
-        $user->is_admin = !$user->is_admin;
+        $user = User::find($id);
+        $user->is_admin = ! $user->is_admin;
+        Log::info("User $user->id has been ".(! $user->is_admin ? 'promoted' : 'demoted').'to admin at '.now().'from '.request()->ip().'by user'.Auth::user()->id);
         $user->save();
+
         return back();
-	}
+    }
 
     // UNSECURE - VULNERABILE A SSRF: fetch di URL arbitrari passati dall'utente
     public function fetchExternalData(Request $request, FinancialDataService $financialDataService)
@@ -59,6 +66,7 @@ class AdminController extends Controller
         // UNSECURE: nessuna validazione dell'URL fornito dall'utente
         $url = $request->get('url');
         $result = $financialDataService->fetchExternalData($url);
+
         return response()->json($result);
 
         // SECURE
