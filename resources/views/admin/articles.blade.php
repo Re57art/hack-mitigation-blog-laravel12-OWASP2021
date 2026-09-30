@@ -8,7 +8,8 @@
         </nav>
         <div class="row mb-4">
             <div class="col-12 text-center">
-                <h1 class="display-5 fw-bold text-primary mb-3"><i class="bi bi-journal-text me-2"></i>Articles Management</h1>
+                <h1 class="display-5 fw-bold text-primary mb-3"><i class="bi bi-journal-text me-2"></i>Articles
+                    Management</h1>
                 <p class="lead text-muted">Review, publish and manage articles</p>
             </div>
         </div>
@@ -19,16 +20,16 @@
                         <div class="table-responsive">
                             <table class="table table-hover table-bordered align-middle rounded">
                                 <thead class="table-light">
-                                    <tr>
-                                        <th scope="col">ID</th>
-                                        <th scope="col">Title</th>
-                                        <th scope="col">Author</th>
-                                        <th scope="col">Published</th>
-                                        <th scope="col">Actions</th>
-                                    </tr>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Title</th>
+                                    <th scope="col">Author</th>
+                                    <th scope="col">Published</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($articles as $article)
+                                @foreach ($articles as $article)
                                     <tr>
                                         <th scope="row">{{$article->id}}</th>
                                         <td>{{$article->title}}</td>
@@ -42,25 +43,30 @@
                                         </td>
                                         <td>
                                             {{-- UNSECURE --}}
-                                            <a href="{{route('admin.articles.toggle',$article->id)}}" class="btn btn-sm {{ $article->published ? 'btn-outline-danger' : 'btn-outline-success' }}">
-                                                @if($article->published)
-                                                    <i class="bi bi-x-circle me-1"></i> Unpublish
-                                                @else
-                                                    <i class="bi bi-check-circle me-1"></i> Publish
-                                                @endif
-                                            </a>
+                                            {{--                              <a href="{{route('admin.articles.toggle',$article->id)}}" class="btn btn-sm {{ $article->published ? 'btn-outline-danger' : 'btn-outline-success' }}">
+                                                                              @if($article->published)
+                                                                                  <i class="bi bi-x-circle me-1"></i> Unpublish
+                                                                              @else
+                                                                                  <i class="bi bi-check-circle me-1"></i> Publish
+                                                                              @endif
+                                                                          </a>--}}
                                             {{-- SECURE --}}
-                                            {{-- <form action="{{route('articles.toggle',$article->id)}}" method="post" class="d-inline">
+                                            <form action="{{route('admin.articles.toggle',$article->id)}}" method="post"
+                                                  class="d-inline">
                                                 @csrf
                                                 @if($article->published)
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle me-1"></i> Unpublish</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i
+                                                            class="bi bi-x-circle me-1"></i> Unpublish
+                                                    </button>
                                                 @else
-                                                <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-check-circle me-1"></i> Publish</button>
+                                                    <button type="submit" class="btn btn-sm btn-outline-success"><i
+                                                            class="bi bi-check-circle me-1"></i> Publish
+                                                    </button>
                                                 @endif
-                                            </form> --}}
+                                            </form>
                                         </td>
                                     </tr>
-                                    @endforeach
+                                @endforeach
                                 </tbody>
                             </table>
                         </div>

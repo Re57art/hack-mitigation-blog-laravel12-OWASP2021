@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChangeAvatarRequest;
+use App\Http\Requests\ChangeEmailRequest;
+use App\Http\Requests\ChangeNameRequest;
+use App\Http\Requests\DownloadFileRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\UploadFileRequest;
 use App\Models\File;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -29,75 +33,48 @@ class UserController extends Controller
         return view('auth.profile', compact('user'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
         $user = Auth::user();
 
         abort_unless($user && (int) $user->getKey() === (int) $id, 403);
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($user->getKey()),
-            ],
-        ]);
-
-        $user->update($validated);
+        $user->update($request->validated());
 
         return back()->with('message', 'User updated');
     }
 
-    public function changeEmail(Request $request)
+    public function changeEmail(ChangeEmailRequest $request)
     {
         if (! $user = Auth::user()) {
             return response()->json(['message' => 'Forbidden Operation'], 403);
         }
 
-        $validated = $request->validate([
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($user->getKey()),
-            ],
-        ]);
-
-        $user->email = $validated['email'];
+        $user->email = $request->validated('email');
         $user->save();
 
         return back()->with('message', 'Changed successfully');
     }
 
-    public function changeName(Request $request)
+    public function changeName(ChangeNameRequest $request)
     {
         if (! $user = Auth::user()) {
             return response()->json(['message' => 'Forbidden Operation'], 403);
         }
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ]);
-
-        $user->name = $validated['name'];
+        $user->name = $request->validated('name');
         $user->save();
 
         return back()->with('message', 'Changed successfully');
     }
 
-    public function changeImg(Request $request)
+    public function changeImg(ChangeAvatarRequest $request)
     {
         if (! $user = Auth::user()) {
             return back()->with('message', 'Please Log In');
         }
 
-        $validated = $request->validate([
-            'avatar' => ['required', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:2048'],
-        ]);
-
-        $newImage = $validated['avatar'];
+        $newImage = $request->validated('avatar');
         // calculate hash
 
         // UNSECURE with md5
@@ -124,7 +101,7 @@ class UserController extends Controller
         return redirect()->back()->with('message', 'Image updated');
     }
 
-    public function download(Request $request)
+    public function download(DownloadFileRequest $request)
     {
         $user = Auth::user();
 
@@ -132,11 +109,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Forbidden Operation'], 403);
         }
 
-        $validated = $request->validate([
-            'filename' => ['required', 'string', 'max:255'],
-        ]);
-
-        $filename = basename($validated['filename']);
+        $filename = basename($request->validated('filename'));
 
         if (in_array($filename, ['privacy.pdf', 'cookie-policy.pdf'], true)) {
             return Storage::disk('local')->download($filename);
@@ -154,18 +127,14 @@ class UserController extends Controller
         return Storage::disk('public')->download($path, $fileRecord->name);
     }
 
-    public function upload(Request $request)
+    public function upload(UploadFileRequest $request)
     {
 
         if (! $user = Auth::user()) {
             return back()->with('message', 'Please Log In');
         }
 
-        $validated = $request->validate([
-            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,gif,pdf', 'max:5120'],
-        ]);
-
-        $file = $validated['file'];
+        $file = $request->validated('file');
 
         // UNSECURE
         //
